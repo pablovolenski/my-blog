@@ -1,6 +1,11 @@
 [
   {
     "title": "hallo welt",
+    "content": "Hallo Welt Inhalt ",
+    "date": "Tue Feb 17 2026"
+  },
+  {
+    "title": "hallo welt",
     "content": "Inhalt Hallo Welt",
     "date": "17.2.2026"
   },
