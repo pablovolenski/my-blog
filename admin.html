@@ -5,191 +5,265 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Writer Studio</title>
     <style>
-        :root { --accent: #000; --bg: #f9f9f9; }
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+        :root { --accent: #000; --bg: #f9f9f9; --border: #ddd; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); height: 100vh; overflow: hidden; }
         
-        /* 1. Login Gate */
-        #gate { position: fixed; inset: 0; background: #fff; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .gate-box { text-align: center; width: 100%; max-width: 300px; }
-        
-        /* 2. Admin Layout */
-        #admin-ui { display: none; flex-direction: column; height: 100vh; }
-        .nav { display: flex; background: #fff; border-bottom: 1px solid #ddd; padding: 0 10px; }
-        .tab-btn { flex: 1; padding: 15px; border: none; background: none; font-weight: bold; cursor: pointer; color: #888; border-bottom: 3px solid transparent; }
-        .tab-btn.active { color: #000; border-bottom-color: #000; }
+        /* 1. LOGIN GATE - Fixed Centering */
+        #gate { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #fff; z-index: 2000; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .gate-box { width: 90%; max-width: 320px; padding: 20px; text-align: center; }
+        .gate-box h2 { margin-bottom: 20px; font-weight: 900; }
+        .gate-box input { 
+            width: 100%; padding: 15px; margin-bottom: 15px; 
+            border: 2px solid #eee; border-radius: 10px; font-size: 16px; outline: none;
+        }
+        .gate-box input:focus { border-color: var(--accent); }
+        .gate-box button { 
+            width: 100%; padding: 15px; background: #000; color: #fff; 
+            border: none; border-radius: 10px; font-weight: bold; font-size: 16px;
+        }
 
-        /* 3. Editor UI */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; display: none; }
+        /* 2. ADMIN UI */
+        #admin-ui { display: none; flex-direction: column; height: 100vh; }
+        .nav { display: flex; background: #fff; border-bottom: 1px solid var(--border); align-items: center; padding: 0 10px; }
+        .tab-btn { flex: 1; padding: 15px 0; border: none; background: none; font-weight: bold; color: #aaa; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: #000; border-bottom-color: #000; }
+        .logout-btn { padding: 8px 12px; color: red; border: 1px solid red; border-radius: 6px; background: none; font-size: 11px; margin-left: 10px; }
+
+        /* 3. EDITOR & TOOLS */
+        .content-area { flex: 1; overflow-y: auto; padding: 15px; display: none; }
         .content-area.active { display: block; }
         
-        /* Toolbar */
-        .toolbar { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; }
-        .tool { padding: 8px 12px; background: #eee; border-radius: 6px; font-size: 14px; border: none; }
-
-        /* Writing Zone */
-        .editor-wrap { background: #fff; border-radius: 12px; border: 1px solid #ddd; overflow: hidden; }
-        input.title-in { width: 100%; border: none; padding: 20px; font-size: 1.5rem; font-weight: bold; outline: none; border-bottom: 1px solid #eee; }
-        #visual-editor { min-height: 300px; padding: 20px; outline: none; line-height: 1.6; }
-        #html-editor { width: 100%; height: 300px; padding: 20px; border: none; font-family: monospace; display: none; outline: none; background: #222; color: #0f0; box-sizing: border-box; }
-
-        /* Date & Publish */
-        .meta-row { margin: 15px 0; display: flex; gap: 10px; }
-        .meta-row input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ddd; }
-        .publish-btn { background: #000; color: #fff; width: 100%; padding: 20px; border: none; font-weight: bold; border-radius: 12px; margin-top: 10px; }
+        .toolbar { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 10px; align-items: center; }
+        .tool { padding: 10px 14px; background: #eee; border-radius: 8px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; }
         
-        /* Manage List */
-        .post-card { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: none; border: 1px solid red; color: red; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
+        .editor-wrap { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        input.title-in { width: 100%; border: none; padding: 20px; font-size: 1.5rem; font-weight: bold; outline: none; border-bottom: 1px solid #f4f4f4; }
+        
+        /* The Two Modes */
+        #visual-editor { min-height: 350px; padding: 20px; outline: none; line-height: 1.6; background: #fff; }
+        #html-editor { 
+            width: 100%; min-height: 350px; padding: 20px; border: none; 
+            font-family: 'Courier New', monospace; display: none; outline: none; 
+            background: #1e1e1e; color: #9cdcfe; font-size: 14px;
+        }
+
+        .meta-row { margin-top: 15px; }
+        .meta-row input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; }
+
+        .save-bar { padding: 15px; background: #fff; border-top: 1px solid var(--border); }
+        .publish-btn { background: #000; color: #fff; width: 100%; padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 1.1rem; }
+
+        /* List Management */
+        .post-card { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .btn-group button { margin-left: 5px; padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; background: #fff; }
     </style>
 </head>
 <body>
 
     <div id="gate">
         <div class="gate-box">
-            <h2>Keys, please.</h2>
-            <input type="password" id="token" placeholder="Paste Token" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd; border-radius:8px;">
-            <button onclick="unlock()" style="width:100%; padding:12px; background:#000; color:#fff; border-radius:8px; border:none; font-weight:bold;">Enter Admin</button>
+            <h2>Writer Studio</h2>
+            <input type="password" id="tokenIn" placeholder="Enter GitHub Token">
+            <button onclick="unlockApp()">Unlock Admin</button>
         </div>
     </div>
 
     <div id="admin-ui">
         <div class="nav">
-            <button class="tab-btn active" onclick="switchTab('write')">WRITE</button>
-            <button class="tab-btn" onclick="switchTab('manage')">MANAGE</button>
-            <button class="logout-btn" style="margin: 10px;" onclick="logout()">Logout</button>
+            <button class="tab-btn active" id="btn-write" onclick="switchTab('write')">WRITE</button>
+            <button class="tab-btn" id="btn-manage" onclick="switchTab('manage')">MANAGE</button>
+            <button class="logout-btn" onclick="location.reload()">LOGOUT</button>
         </div>
 
         <div id="tab-write" class="content-area active">
             <div class="toolbar">
-                <button class="tool" onclick="exec('bold')">B</button>
-                <button class="tool" onclick="exec('italic')">I</button>
-                <button class="tool" onclick="exec('formatBlock','H1')">H1</button>
-                <input type="color" onchange="exec('foreColor', this.value)" style="width:30px; height:30px; border:none; background:none;">
-                <button class="tool" onclick="toggleMode()">View Code</button>
-                <label class="tool">📷 <input type="file" style="display:none" onchange="handleMedia(this)"></label>
+                <button class="tool" onclick="doEdit('bold')">B</button>
+                <button class="tool" onclick="doEdit('italic')">I</button>
+                <button class="tool" onclick="doEdit('formatBlock','h1')">H1</button>
+                <input type="color" onchange="doEdit('foreColor', this.value)" style="width:30px; height:34px; border:none; background:none;">
+                <button class="tool" onclick="toggleEditorMode()" id="mode-toggle">Code View</button>
+                <label class="tool">📷 <input type="file" style="display:none" onchange="uploadImage(this)"></label>
             </div>
 
             <div class="editor-wrap">
                 <input type="text" id="post-title" class="title-in" placeholder="Entry Title">
-                <div id="visual-editor" contenteditable="true" oninput="syncToCode()"></div>
-                <textarea id="html-editor" oninput="syncToVisual()"></textarea>
+                <div id="visual-editor" contenteditable="true"></div>
+                <textarea id="html-editor"></textarea>
             </div>
 
             <div class="meta-row">
-                <input type="text" id="post-date" placeholder="Date (e.g. Feb 17, 2026)">
+                <input type="text" id="post-date" placeholder="Date (e.g., Feb 17, 2026)">
             </div>
             
-            <button class="publish-btn" id="save-btn" onclick="savePost()">PUBLISH POST</button>
+            <div style="height: 20px;"></div>
+            <button class="publish-btn" id="main-save-btn" onclick="publishContent()">PUBLISH POST</button>
         </div>
 
         <div id="tab-manage" class="content-area">
-            <div id="manage-list">Loading posts...</div>
+            <div id="manage-list">Loading...</div>
         </div>
     </div>
 
 <script>
-    let currentToken = "";
-    let isCodeView = false;
-    let editingIndex = -1;
-    const user = 'pablovolenski';
-    const repo = 'my-blog';
+    let AUTH_TOKEN = "";
+    let isCodeMode = false;
+    let editIdx = -1;
+    const G_USER = 'pablovolenski';
+    const G_REPO = 'my-blog';
 
-    // 1. GATEKEEPER LOGIC
-    function unlock() {
-        currentToken = document.getElementById('token').value;
-        if (!currentToken) return alert("No token!");
+    // 1. APP CONTROL
+    function unlockApp() {
+        const val = document.getElementById('tokenIn').value;
+        if (!val) { alert("Token required"); return; }
+        AUTH_TOKEN = val;
         document.getElementById('gate').style.display = 'none';
         document.getElementById('admin-ui').style.display = 'flex';
         document.getElementById('post-date').value = new Date().toDateString();
-        loadManageList();
     }
 
-    function logout() {
-        location.reload(); // Wipes memory and shows login
-    }
-
-    // 2. TABS & EDITOR MODES
     function switchTab(t) {
-        document.querySelectorAll('.content-area, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById('tab-write').classList.remove('active');
+        document.getElementById('tab-manage').classList.remove('active');
+        document.getElementById('btn-write').classList.remove('active');
+        document.getElementById('btn-manage').classList.remove('active');
+        
         document.getElementById('tab-' + t).classList.add('active');
-        event.target.classList.add('active');
-        if(t === 'manage') loadManageList();
+        document.getElementById('btn-' + t).classList.add('active');
+        if(t === 'manage') refreshList();
     }
 
-    function exec(cmd, val=null) { document.execCommand(cmd, false, val); syncToCode(); }
-
-    function toggleMode() {
-        const visual = document.getElementById('visual-editor');
-        const code = document.getElementById('html-editor');
-        isCodeView = !isCodeView;
-        visual.style.display = isCodeView ? 'none' : 'block';
-        code.style.display = isCodeView ? 'block' : 'none';
-        event.target.innerText = isCodeView ? "View Visual" : "View Code";
+    // 2. EDITOR LOGIC
+    function doEdit(cmd, val=null) {
+        document.execCommand(cmd, false, val);
+        updateCodeFromVisual();
     }
 
-    function syncToCode() { document.getElementById('html-editor').value = document.getElementById('visual-editor').innerHTML; }
-    function syncToVisual() { document.getElementById('visual-editor').innerHTML = document.getElementById('html-editor').value; }
+    function toggleEditorMode() {
+        const v = document.getElementById('visual-editor');
+        const c = document.getElementById('html-editor');
+        isCodeMode = !isCodeMode;
+        if (isCodeMode) {
+            c.value = v.innerHTML;
+            v.style.display = 'none';
+            c.style.display = 'block';
+            document.getElementById('mode-toggle').innerText = "Visual View";
+        } else {
+            v.innerHTML = c.value;
+            c.style.display = 'none';
+            v.style.display = 'block';
+            document.getElementById('mode-toggle').innerText = "Code View";
+        }
+    }
 
-    // 3. MEDIA & GITHUB LOGIC
-    async function handleMedia(input) {
+    function updateCodeFromVisual() {
+        document.getElementById('html-editor').value = document.getElementById('visual-editor').innerHTML;
+    }
+
+    // 3. API LOGIC
+    async function uploadImage(input) {
         const file = input.files[0];
         const reader = new FileReader();
         reader.onload = async (e) => {
             const b64 = e.target.result.split(',')[1];
-            const name = `media/${Date.now()}-${file.name.replace(/\s/g,'-')}`;
-            const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/${name}`, {
+            const name = `media/${Date.now()}-${file.name.replace(/\s+/g,'-')}`;
+            const res = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/contents/${name}`, {
                 method: 'PUT',
-                headers: { 'Authorization': `token ${currentToken}` },
-                body: JSON.stringify({ message: "upload", content: b64 })
+                headers: { 'Authorization': `token ${AUTH_TOKEN}` },
+                body: JSON.stringify({ message: "img upload", content: b64 })
             });
             if(res.ok) {
-                const url = `https://raw.githubusercontent.com/${user}/${repo}/main/${name}`;
-                document.execCommand('insertHTML', false, `<img src="${url}" style="width:100%; border-radius:10px;">`);
+                const url = `https://raw.githubusercontent.com/${G_USER}/${G_REPO}/main/${name}`;
+                document.execCommand('insertHTML', false, `<img src="${url}" style="width:100%; border-radius:10px; margin:10px 0;">`);
+                updateCodeFromVisual();
             }
         };
         reader.readAsDataURL(file);
     }
 
-    async function savePost() {
+    async function publishContent() {
         const title = document.getElementById('post-title').value;
-        const content = document.getElementById('visual-editor').innerHTML;
+        const content = isCodeMode ? document.getElementById('html-editor').value : document.getElementById('visual-editor').innerHTML;
         const date = document.getElementById('post-date').value;
-        const url = `https://api.github.com/repos/${user}/${repo}/contents/posts.json`;
-        
+        const url = `https://api.github.com/repos/${G_USER}/${G_REPO}/contents/posts.json`;
+
+        if(!title || !content) { alert("Title and content needed"); return; }
+
         try {
             const res = await fetch(url + '?t=' + Date.now());
             const data = await res.json();
             let posts = JSON.parse(atob(data.content));
 
-            const newPost = { title, content, date };
-            if (editingIndex > -1) posts[editingIndex] = newPost;
-            else posts.unshift(newPost);
+            if (editIdx > -1) posts[editIdx] = { title, content, date };
+            else posts.unshift({ title, content, date });
 
             const update = await fetch(url, {
                 method: 'PUT',
-                headers: { 'Authorization': `token ${currentToken}` },
+                headers: { 'Authorization': `token ${AUTH_TOKEN}` },
                 body: JSON.stringify({
-                    message: "Update Blog",
+                    message: "Web Studio Update",
                     content: btoa(unescape(encodeURIComponent(JSON.stringify(posts, null, 2)))),
                     sha: data.sha
                 })
             });
 
-            if (update.ok) {
-                alert("Success!");
-                location.reload();
-            }
-        } catch (e) { alert("Error saving."); }
+            if (update.ok) { alert("Success!"); location.reload(); }
+        } catch (e) { alert("Error saving to GitHub."); }
     }
 
-    async function loadManageList() {
-        const res = await fetch(`https://api.github.com/repos/${user}/${repo}/contents/posts.json?t=` + Date.now());
+    async function refreshList() {
+        const list = document.getElementById('manage-list');
+        list.innerHTML = "Fetching...";
+        try {
+            const res = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/contents/posts.json?t=` + Date.now());
+            const data = await res.json();
+            const posts = JSON.parse(atob(data.content));
+            list.innerHTML = "";
+            posts.forEach((p, i) => {
+                list.innerHTML += `<div class="post-card">
+                    <div><strong>${p.title}</strong><br><small>${p.date}</small></div>
+                    <div class="btn-group">
+                        <button onclick="loadToEditor(${i})">Edit</button>
+                        <button onclick="dropPost(${i})" style="color:red">Del</button>
+                    </div>
+                </div>`;
+            });
+        } catch(e) { list.innerHTML = "Error loading list."; }
+    }
+
+    window.loadToEditor = async function(idx) {
+        const res = await fetch(`https://api.github.com/repos/${G_USER}/${G_REPO}/contents/posts.json`);
         const data = await res.json();
         const posts = JSON.parse(atob(data.content));
-        const list = document.getElementById('manage-list');
-        list.innerHTML = "";
-        posts.forEach((p, i) => {
-            list.innerHTML += `<div class="post-card">
-                <div><strong>${p.title}</strong><br><small>${p.date}</small></div>
-                <div>
-                    <button onclick="editPost(${i})">
+        const p = posts[idx];
+        
+        document.getElementById('post-title').value = p.title;
+        document.getElementById('visual-editor').innerHTML = p.content;
+        document.getElementById('html-editor').value = p.content;
+        document.getElementById('post-date').value = p.date;
+        editIdx = idx;
+        document.getElementById('main-save-btn').innerText = "UPDATE EXISTING POST";
+        switchTab('write');
+    }
+
+    window.dropPost = async function(idx) {
+        if(!confirm("Delete forever?")) return;
+        const url = `https://api.github.com/repos/${G_USER}/${G_REPO}/contents/posts.json`;
+        const res = await fetch(url + '?t=' + Date.now());
+        const data = await res.json();
+        let posts = JSON.parse(atob(data.content));
+        posts.splice(idx, 1);
+        await fetch(url, {
+            method: 'PUT',
+            headers: { 'Authorization': `token ${AUTH_TOKEN}` },
+            body: JSON.stringify({ message: "delete", content: btoa(JSON.stringify(posts, null, 2)), sha: data.sha })
+        });
+        refreshList();
+    }
+</script>
+</body>
+</html>
