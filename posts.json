@@ -1,5 +1,10 @@
 [
   {
+    "title": "This is another title",
+    "content": "And this is another fine piece of content..brief and all, but still ",
+    "date": "Tue Feb 17 2026"
+  },
+  {
     "title": "hallo welt",
     "content": "Hallo Welt Inhalt ",
     "date": "Tue Feb 17 2026"
