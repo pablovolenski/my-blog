@@ -1,8 +1,46 @@
-fetch('posts.json')
-  .then(res => res.json())
-  .then(posts => {
-    const container = document.getElementById('blog');
-    posts.forEach(p => {
-      container.innerHTML += `<article><h1>${p.title}</h1><p>${p.content}</p></article>`;
-    });
-  });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        article { margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        h1 { margin: 0; color: #333; }
+    </style>
+</head>
+<body>
+    <div id="blog">Loading posts...</div>
+
+    <script>
+        // Fetch the JSON file and render the posts
+        fetch('posts.json')
+            .then(response => {
+                if (!response.ok) throw new Error("Could not find posts.json");
+                return response.json();
+            })
+            .then(posts => {
+                const container = document.getElementById('blog');
+                container.innerHTML = ''; // Clear the loading message
+
+                if (posts.length === 0) {
+                    container.innerHTML = "No posts found.";
+                    return;
+                }
+
+                posts.forEach(p => {
+                    const article = document.createElement('article');
+                    article.innerHTML = `
+                        <h1>${p.title}</h1>
+                        <p>${p.content}</p>
+                    `;
+                    container.appendChild(article);
+                });
+            })
+            .catch(err => {
+                document.getElementById('blog').innerHTML = "Error: " + err.message;
+            });
+    </script>
+</body>
+</html>
