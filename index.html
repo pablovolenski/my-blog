@@ -3,63 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - New Post</title>
+    <title>Pablo's Blog</title>
     <style>
-        body { font-family: sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-        input, textarea { width: 100%; margin-bottom: 10px; padding: 8px; box-sizing: border-box; }
-        textarea { height: 150px; }
-        button { width: 100%; padding: 10px; background: #333; color: #fff; border: none; cursor: pointer; }
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        article { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        h1 { margin: 0; color: #222; }
+        .date { color: #888; font-size: 0.8rem; }
+        .content { white-space: pre-wrap; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <h2>Create New Post</h2>
-    <input type="password" id="token" placeholder="Paste GitHub Token here">
-    <input type="text" id="title" placeholder="Post Title">
-    <textarea id="content" placeholder="Post Content..."></textarea>
-    <button onclick="publish()">Save Post</button>
+    <div id="blog-display">Loading posts...</div>
 
     <script>
-        async function publish() {
-            const token = document.getElementById('token').value;
-            const title = document.getElementById('title').value;
-            const content = document.getElementById('content').value;
-            const user = 'pablovolenski';
-            const repo = 'my-blog';
-            const path = 'posts.json';
-            const url = `https://api.github.com/repos/${user}/${repo}/contents/${path}`;
-
-            try {
-                // 1. Get the current file content
-                const getRes = await fetch(url);
-                const fileData = await getRes.json();
-                const currentPosts = JSON.parse(atob(fileData.content));
-
-                // 2. Add the new post to the top
-                currentPosts.unshift({ title, content, date: new Date().toDateString() });
-
-                // 3. Push the updated list back to GitHub
-                const putRes = await fetch(url, {
-                    method: 'PUT',
-                    headers: { 
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json' 
-                    },
-                    body: JSON.stringify({
-                        message: "New blog post",
-                        content: btoa(JSON.stringify(currentPosts, null, 2)),
-                        sha: fileData.sha
-                    })
-                });
-
-                if (putRes.ok) {
-                    alert("Success! Post added.");
-                } else {
-                    alert("Error: Check your token.");
+        // We add a timestamp (?t=) to bypass phone browser cache
+        fetch('posts.json?t=' + Date.now())
+            .then(res => res.json())
+            .then(posts => {
+                const container = document.getElementById('blog-display');
+                if (posts.length === 0) {
+                    container.innerHTML = "No posts found. Use the admin page to create one!";
+                    return;
                 }
-            } catch (err) {
-                alert("Error: " + err.message);
-            }
-        }
+                container.innerHTML = '';
+                posts.forEach(p => {
+                    container.innerHTML += `
+                        <article>
+                            <h1>${p.title}</h1>
+                            <span class="date">${p.date || ''}</span>
+                            <div class="content">${p.content}</div>
+                        </article>`;
+                });
+            })
+            .catch(err => {
+                document.getElementById('blog-display').innerHTML = "Post list is empty or posts.json is missing.";
+            });
     </script>
 </body>
 </html>
