@@ -1,45 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Minimalist Blog</title>
-    <style>
-        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; color: #333; }
-        article { margin-bottom: 40px; border-bottom: 1px solid #eee; }
-        h1 { margin-bottom: 0; }
-        .date { color: #888; font-size: 0.8rem; }
-    </style>
-</head>
-<body>
-    <div id="blog">Loading posts...</div>
+<script>
+    const GITHUB_USERNAME = 'pablovolenski'; 
+    const REPO_NAME = 'my-blog';
+    const API_URL = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/issues`;
 
-    <script>
-        // Replace with your GitHub Username and Repo Name
-        const GITHUB_USERNAME = 'your-username';
-        const REPO_NAME = 'your-repo-name';
-        const API_URL = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/issues?state=open`;
+    async function fetchPosts() {
+        const response = await fetch(API_URL);
+        const issues = await response.json();
+        const blogDiv = document.getElementById('blog');
+        blogDiv.innerHTML = '';
 
-        async function fetchPosts() {
-            const response = await fetch(API_URL);
-            const issues = await response.json();
-            const blogDiv = document.getElementById('blog');
-            blogDiv.innerHTML = '';
-
-            issues.forEach(issue => {
-                // Only show issues created by YOU (the owner)
-                if (issue.user.login === GITHUB_USERNAME) {
-                    const post = document.createElement('article');
-                    post.innerHTML = `
-                        <h1>${issue.title}</h1>
-                        <div class="date">${new Date(issue.created_at).toLocaleDateString()}</div>
-                        <div>${issue.body}</div>
-                    `;
-                    blogDiv.appendChild(post);
-                }
-            });
-        }
-        fetchPosts();
-    </script>
-</body>
-</html>
+        issues.forEach(issue => {
+            if (!issue.pull_request) { // Skip PRs
+                const post = document.createElement('article');
+                post.innerHTML = `
+                    <h1>${issue.title}</h1>
+                    <p>${issue.body}</p>
+                    <hr>
+                `;
+                blogDiv.appendChild(post);
+            }
+        });
+    }
+    fetchPosts();
+</script>
