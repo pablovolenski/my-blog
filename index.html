@@ -1,25 +1,55 @@
-<script>
-    const GITHUB_USERNAME = 'pablovolenski'; 
-    const REPO_NAME = 'my-blog';
-    const API_URL = `https://api.github.com/repos/$pablovolenski/$my-blog/issues`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+        article { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
+        h1 { margin: 0 0 10px 0; }
+        .date { color: #888; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <div id="blog-posts">Loading posts...</div>
 
-    async function fetchPosts() {
-        const response = await fetch(API_URL);
-        const issues = await response.json();
-        const blogDiv = document.getElementById('blog');
-        blogDiv.innerHTML = '';
+    <script>
+        // Manually set your details here
+        const username = 'pablovolenski';
+        const repo = 'my-blog';
 
-        issues.forEach(issue => {
-            if (!issue.pull_request) { // Skip PRs
-                const post = document.createElement('article');
-                post.innerHTML = `
-                    <h1>${issue.title}</h1>
-                    <p>${issue.body}</p>
-                    <hr>
-                `;
-                blogDiv.appendChild(post);
+        async function loadBlog() {
+            const url = `https://api.github.com/repos/$pablovolenski/$my-blog/issues?state=open`;
+            
+            try {
+                const response = await fetch(url);
+                const issues = await response.json();
+                const container = document.getElementById('blog-posts');
+                
+                if (issues.length === 0) {
+                    container.innerHTML = "No posts found. Create an issue to see it here!";
+                    return;
+                }
+
+                container.innerHTML = '';
+                issues.forEach(issue => {
+                    if (!issue.pull_request) {
+                        const post = document.createElement('article');
+                        post.innerHTML = `
+                            <h1>${issue.title}</h1>
+                            <div class="date">${new Date(issue.created_at).toLocaleDateString()}</div>
+                            <div>${issue.body.replace(/\n/g, '<br>')}</div>
+                        `;
+                        container.appendChild(post);
+                    }
+                });
+            } catch (e) {
+                document.getElementById('blog-posts').innerHTML = "Error loading posts.";
             }
-        });
-    }
-    fetchPosts();
-</script>
+        }
+
+        loadBlog();
+    </script>
+</body>
+</html>
