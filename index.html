@@ -6,23 +6,27 @@
     <title>Pablo's Blog</title>
     <style>
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            max-width: 650px; 
-            margin: 40px auto; 
-            padding: 20px; 
-            line-height: 1.6; 
-            color: #222;
-            background-color: #fff;
+            font-family: -apple-system, system-ui, sans-serif; 
+            max-width: 700px; margin: 40px auto; padding: 20px; 
+            line-height: 1.6; color: #222; 
         }
-        header { border-bottom: 2px solid #000; margin-bottom: 50px; padding-bottom: 10px; }
-        h1 { font-size: 2rem; margin: 0; }
+        header { border-bottom: 2px solid #000; margin-bottom: 40px; }
         article { margin-bottom: 60px; }
-        article h2 { margin: 0 0 10px 0; font-size: 1.5rem; color: #000; }
-        .date { color: #888; font-size: 0.85rem; display: block; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .content { white-space: pre-wrap; font-size: 1.1rem; }
-        #status-msg { text-align: center; color: #666; margin-top: 50px; }
-        footer { margin-top: 100px; font-size: 0.8rem; color: #ccc; text-align: center; }
-        footer a { color: inherit; text-decoration: none; }
+        h1 { font-size: 2.2rem; margin-bottom: 0; }
+        h2 { font-size: 1.8rem; margin-top: 10px; }
+        .date { color: #888; font-size: 0.85rem; text-transform: uppercase; }
+        
+        /* Ensures uploaded images fit the screen */
+        .content img { 
+            max-width: 100%; 
+            height: auto; 
+            border-radius: 8px; 
+            margin: 20px 0;
+            display: block;
+        }
+        .content { white-space: pre-wrap; font-size: 1.15rem; }
+        footer { margin-top: 80px; opacity: 0.3; text-align: center; }
+        footer a { text-decoration: none; color: #000; }
     </style>
 </head>
 <body>
@@ -31,51 +35,36 @@
         <h1>Pablo's Blog</h1>
     </header>
 
-    <div id="blog-display">
-        <p id="status-msg">Loading posts...</p>
-    </div>
+    <div id="posts-container">Loading...</div>
 
-    <footer>
-        <p>&copy; 2026</p>
-        <a href="admin.html">.</a>
-    </footer>
+    <footer><a href="admin.html">.</a></footer>
 
     <script>
-        // We add a timestamp to the URL to prevent the phone browser 
-        // from showing old cached versions of your posts.
-        const postsUrl = 'posts.json?t=' + Date.now();
-
         async function loadPosts() {
-            const container = document.getElementById('blog-display');
-            
+            const container = document.getElementById('posts-container');
             try {
-                const response = await fetch(postsUrl);
-                if (!response.ok) throw new Error("Could not load posts.");
-
+                const response = await fetch('posts.json?t=' + Date.now());
                 const posts = await response.json();
                 
                 if (posts.length === 0) {
-                    container.innerHTML = "<p id='status-msg'>No posts published yet.</p>";
+                    container.innerHTML = "No posts found.";
                     return;
                 }
 
-                container.innerHTML = ''; // Clear loading message
-
+                container.innerHTML = '';
                 posts.forEach(post => {
-                    const article = document.createElement('article');
-                    article.innerHTML = `
+                    const el = document.createElement('article');
+                    el.innerHTML = `
+                        <span class="date">${post.date}</span>
                         <h2>${post.title}</h2>
-                        <span class="date">${post.date || ''}</span>
                         <div class="content">${post.content}</div>
                     `;
-                    container.appendChild(article);
+                    container.appendChild(el);
                 });
-
-            } catch (error) {
-                container.innerHTML = "<p id='status-msg'>Error: Make sure posts.json exists in your repository.</p>";
+            } catch (e) {
+                container.innerHTML = "Error loading posts.json";
             }
         }
-
         loadPosts();
     </script>
 </body>
