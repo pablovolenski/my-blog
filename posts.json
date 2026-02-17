@@ -1,5 +1,10 @@
 [
   {
+    "title": "this is an image",
+    "content": "<img src=\"https://raw.githubusercontent.com/pablovolenski/my-blog/main/media/1771368021804-file_000000004304720a82f417141b5a005a.png\" style=\"width:100%; border-radius:10px; margin:15px 0;\">\nIm uploading this as a test of how it looks to upload images in this rustic blog system ",
+    "date": "Tue Feb 17 2026"
+  },
+  {
     "title": "This is another title",
     "content": "And this is another fine piece of content..brief and all, but still ",
     "date": "Tue Feb 17 2026"
