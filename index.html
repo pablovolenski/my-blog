@@ -1,72 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pablo Volenski | Blog</title>
-    <style>
-        body { 
-            font-family: -apple-system, system-ui, sans-serif; 
-            max-width: 600px; 
-            margin: 40px auto; 
-            padding: 20px; 
-            line-height: 1.6; 
-            color: #222;
-        }
-        article { margin-bottom: 50px; }
-        h1 { font-size: 1.5rem; margin-bottom: 5px; }
-        .date { color: #888; font-size: 0.8rem; margin-bottom: 20px; display: block; }
-        .content { white-space: pre-wrap; }
-        hr { border: 0; border-top: 1px solid #eee; margin-top: 40px; }
-    </style>
-</head>
-<body>
-    <div id="blog-posts">Loading posts...</div>
-
-    <script>
-        // Proper names already inserted for you
-        const username = 'pablovolenski';
-        const repo = 'my-blog';
-
-        async function loadBlog() {
-            const container = document.getElementById('blog-posts');
-            const url = `https://api.github.com/repos/${username}/${repo}/issues?state=open`;
-            
-            try {
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    container.innerHTML = `Error: ${response.status}. Make sure the repo is Public.`;
-                    return;
-                }
-
-                const issues = await response.json();
-                
-                if (issues.length === 0) {
-                    container.innerHTML = "No posts yet. Click 'Issues' in your repo to write one!";
-                    return;
-                }
-
-                container.innerHTML = '';
-                issues.forEach(issue => {
-                    // Skip Pull Requests
-                    if (!issue.pull_request) {
-                        const post = document.createElement('article');
-                        post.innerHTML = `
-                            <h1>${issue.title}</h1>
-                            <span class="date">${new Date(issue.created_at).toDateString()}</span>
-                            <div class="content">${issue.body}</div>
-                            <hr>
-                        `;
-                        container.appendChild(post);
-                    }
-                });
-            } catch (e) {
-                container.innerHTML = "Failed to connect to GitHub.";
-            }
-        }
-
-        loadBlog();
-    </script>
-</body>
-</html>
+fetch('posts.json')
+  .then(res => res.json())
+  .then(posts => {
+    const container = document.getElementById('blog');
+    posts.forEach(p => {
+      container.innerHTML += `<article><h1>${p.title}</h1><p>${p.content}</p></article>`;
+    });
+  });
