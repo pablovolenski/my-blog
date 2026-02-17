@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>New Post</h2>
+  <input type="password" id="token" placeholder="GitHub Personal Access Token"><br>
+  <input type="text" id="title" placeholder="Title"><br>
+  <textarea id="content" placeholder="Content"></textarea><br>
+  <button onclick="publish()">Publish</button>
+
+  <script>
+    async function publish() {
+      const token = document.getElementById('token').value;
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+      const path = 'posts.json';
+      const url = `https://api.github.com/repos/pablovolenski/my-blog/contents/${path}`;
+
+      // 1. Get the current file (to get its "sha" ID)
+      const res = await fetch(url);
+      const fileData = await res.json();
+      const posts = JSON.parse(atob(fileData.content));
+
+      // 2. Add the new post
+      posts.unshift({ title, content, date: new Date().toLocaleDateString() });
+
+      // 3. Push it back to GitHub
+      const update = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `New post: ${title}`,
+          content: btoa(JSON.stringify(posts, null, 2)),
+          sha: fileData.sha
+        })
+      });
+
+      if(update.ok) alert('Published!');
+    }
+  </script>
+</body>
+</html>
